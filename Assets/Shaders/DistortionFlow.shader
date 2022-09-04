@@ -16,27 +16,37 @@ Shader "Custom/DistortionFlow" {
 		_FlowOffset ("Flow Offset", Float) = 0
 		_HeightScale ("Height Scale, Constant", Float) = 0.25
 		_HeightScaleModulated ("Height Scale, Modulated", Float) = 0.75
+		_WaterFogColor ("Water Fog Color", Color) = (0, 0, 0, 0) //simple exponential fog for the transparent aspect of our water.
+		_WaterFogDensity ("Water Fog Density", Range(0, 2)) = 0.1
+		_RefractionStrength ("Refraction Strength", Range(0, 1)) = 0.25
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 	}
 	SubShader {
-		Tags { "RenderType"="Opaque" }
+		Tags { "RenderType"="Transparent" "Queue"="Transparent" } //RenderType changed from Opaque to Transparent
 		LOD 200
         
+		GrabPass { "_WaterBackground" } //To adjust the colour of the background we need to retrieve it somehow.
+		//GrabPass adds an extra step in the rendering pipeline that happens each time something that uses
+		//our water texture is rendered but if we put the texture's name into the grabpass then we will only do the pass once.
+		//Because all water surfaces will use the same texture. 
+		
 		CGPROGRAM
-		#pragma surface surf Standard fullforwardshadows
+		#pragma surface surf Standard alpha finalcolor:ResetAlpha //fullforwardshadows //we don't need to support any shadow type now
 		#pragma target 3.0
         
-        #include "FlowUV.cginc" //Making a texture flow like water is a generic idea that
+        #include "Flow.cginc" //Making a texture flow like water is a generic idea that
         //can be applied to any texture.
-        //The very basic is making the texture move like it's a floor motor walkway.
-        
+        //The very basic is making the texture move like it's a motor walkway.
+        #include "LookingThroughWater.cginc"
+		
 		sampler2D _MainTex, _FlowMap, _DerivHeightMap; //_NormalMap;
         //Making real water flow is easier with a flowmap instead of going in on insane maps.
         float _UJump, _VJump, _Tiling, _Speed, _FlowStrength, _FlowOffset;
 
 		struct Input {
 			float2 uv_MainTex;
+			float4 screenPos; //Gives us the screen space coordinates of the current fragment.
 		};
 		
 		float _HeightScale, _HeightScaleModulated;
@@ -48,6 +58,10 @@ Shader "Custom/DistortionFlow" {
 			float3 dh = textureData.agb;
 			dh.xy = dh.xy * 2 - 1;
 			return dh;
+		}
+		
+		void ResetAlpha (Input IN, SurfaceOutputStandard o, inout fixed4 color) {
+			color.a = 1;
 		}
 		
 		void surf (Input IN, inout SurfaceOutputStandard o) {
@@ -93,9 +107,12 @@ Shader "Custom/DistortionFlow" {
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
 			o.Alpha = c.a;
+			
+			o.Emission = ColorBelowWater(IN.screenPos, o.Normal) * (1 - c.a);
+			//o.Alpha = 1;
 		}
 		ENDCG
 	}
 
-	FallBack "Diffuse"
+	//FallBack "Diffuse" //with this and fullforwardshadow gone the shadows will stop being cast by the shader.
 }
