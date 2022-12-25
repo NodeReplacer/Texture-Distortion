@@ -3,11 +3,13 @@ Utilizing a process outlined by Alex Vlachos of Valve to animate a texture as if
 
 # Distortion Flow
 https://user-images.githubusercontent.com/80176553/209481883-0aaee988-7ee8-4146-8a0a-8843facdc3cf.mp4
+
 A shader is used to distort the UV coordinates of a texture.
 The shader samples from curl noise and uses a Flow Map which holds 2D vectors in its R and G channels. The R channel holds U values while the G hold V coordinates. This causes distortion and as we progress along it gets worse and worse. We loop back to the "no distortion" point and then put work into hiding the fact that we are doing so (because a water texture going from "distorted" to "completely still" is very obvious). This process is then looped.
 
 # Waves
 https://user-images.githubusercontent.com/80176553/209481944-8a948311-86fd-4dc0-8bb1-d767f7447c69.mp4
+
 Texture animation creates the illusion of moving surfacces, but the mesh is not actually moving.
 That's fine for small ripples but cannot create big waves.
 To start with: We use multiple sine waves to modify the vertex data of whatever mesh our Waves shader is attached to. This cannot be done with a quad but must use a plane of multiple 10x10 quads. That's our baseline. Of course, waves don't really move like that so we expand this idea.
