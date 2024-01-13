@@ -12,7 +12,7 @@ The shader samples from curl noise and uses a Flow Map which holds 2D vectors in
 # Waves
 https://user-images.githubusercontent.com/80176553/209481944-8a948311-86fd-4dc0-8bb1-d767f7447c69.mp4
 
-Texture animation creates the illusion of moving surfacces, but the mesh is not actually moving.
+Texture animation creates the illusion of moving surfaces, but the mesh is not actually moving.
 That's fine for small ripples but cannot create big waves.
 To start with: We use multiple sine waves to modify the vertex data of whatever mesh our Waves shader is attached to. This cannot be done with a quad but must use a plane of multiple 10x10 quads. That's our baseline. Of course, waves don't really move like that so we expand this idea.
 
