@@ -4,6 +4,8 @@ Utilizing a process outlined by Alex Vlachos of Valve to animate a texture as if
 # Distortion Flow
 https://user-images.githubusercontent.com/80176553/209481883-0aaee988-7ee8-4146-8a0a-8843facdc3cf.mp4
 
+The water color itself was changed to an opaque black to better show the visuals.
+
 A shader is used to distort the UV coordinates of a texture.
 The shader samples from curl noise and uses a Flow Map which holds 2D vectors in its R and G channels. The R channel holds U values while the G hold V coordinates. This causes distortion and as we progress along it gets worse and worse. We loop back to the "no distortion" point and then put work into hiding the fact that we are doing so (because a water texture going from "distorted" to "completely still" is very obvious). This process is then looped.
 
